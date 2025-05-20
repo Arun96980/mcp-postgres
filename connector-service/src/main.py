@@ -22,3 +22,24 @@ async def nlquery_endpoint(request: NLQueryRequest):
         return {"generated_sql": sql, "results": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+class ExecuteRequest(BaseModel):
+    prompt: str
+    #schema: str = ""  
+
+@app.post("/execute")
+async def execute_endpoint(request: ExecuteRequest):
+    try:
+        # Generate SQL from Gemini
+        sql = generate_sql(request.prompt, request.schema)
+
+        # Execute SQL against database
+        result = execute_sql(sql)
+
+        return {
+            "generated_sql": sql,
+            "result": result
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

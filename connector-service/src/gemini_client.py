@@ -19,24 +19,19 @@ def analyze_data(prompt: str, data: dict):
     response = model.generate_content(full_prompt)
     return response.text
 
-def generate_sql(nl_prompt: str, table_schema: str):
-    prompt = f"""
-You are a SQL expert. Based on the schema below, write a SQL SELECT query that fulfills the user's request.
+def generate_sql(prompt: str, schema: str = ""):
+    full_prompt = f"""
+You are an advanced PostgreSQL assistant. Your task is to generate valid SQL statements to fully manage the database. 
+You may receive tasks such as querying data, creating tables, inserting data, updating records, or managing triggers.
 
-Schema:
-{table_schema}
+Schema (if available):
+{schema if schema else "None"}
 
-User Request:
-{nl_prompt}
+Task:
+{prompt}
 
-Respond with only the SQL query. Do not include explanations, markdown, or formatting.
+Output only valid PostgreSQL SQL code. Do not include explanations, markdown, or comments.
+Ensure the SQL is executable in psql.
 """
-    response = model.generate_content(prompt)
-    raw_sql = response.text.strip()
-
-    # Clean output if Gemini still returns markdown formatting
-    cleaned_sql = re.sub(r"```sql|```", "", raw_sql, flags=re.IGNORECASE).strip()
-
-    # Optionally just extract the first valid statement
-    return cleaned_sql.split(";")[0] + ";"
-
+    response = model.generate_content(full_prompt)
+    return response.text.strip()
